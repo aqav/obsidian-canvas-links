@@ -5,12 +5,16 @@ const VIEW_TYPE: string = "canvas-view"
 export default class CanvasViewPlugin extends Plugin {
 
     onload(): void {
-        console.log('load plugin') // enable plugin
+        // console.log('load plugin') // enable plugin
 
-        this.registerView(VIEW_TYPE, (leaf) => new CanvasView(leaf))
+        this.registerView(VIEW_TYPE, (leaf) => new CanvasView(leaf));
 
-        this.addRibbonIcon("dice", "Load view", () => {
-            this.onloadView();
+        this.addCommand({
+            id: 'show-canvas-view',
+            name: 'Show canvas view',
+            callback: () => {
+                this.onloadView();
+            }
         });
     }
 
@@ -21,14 +25,10 @@ export default class CanvasViewPlugin extends Plugin {
             type: VIEW_TYPE,
             active: true,
         }); // view#onOpen()
-
-        // this.app.workspace.revealLeaf(
-        //     this.app.workspace.getLeavesOfType(VIEW_TYPE)[0]
-        // );
     }
 
-    onunload(): void { 
-        console.log('unload plugin'); // disable plugin
+    onunload(): void {
+        // console.log('unload plugin'); // disable plugin
 
         this.app.workspace.detachLeavesOfType(VIEW_TYPE); // view#onClose()
     }
@@ -49,6 +49,12 @@ class CanvasView extends ItemView {
     }
 
     async onOpen(): Promise<void> {
+        // console.log('open view');
+
+        this.getCanvas().then((canvas) => {
+            this.renderCanvas(canvas, this.containerEl);
+        });
+
         this.registerEvent(this.app.workspace.on('file-open', () => {
             this.getCanvas().then((canvas) => {
                 this.renderCanvas(canvas, this.containerEl);
@@ -57,7 +63,6 @@ class CanvasView extends ItemView {
     }
 
     async getCanvas(): Promise<TFile[]> {
-        console.log('get canvas')
         const activeFile: TFile | null = this.app.workspace.getActiveFile();
         if (activeFile == null) {
             return [];
@@ -140,7 +145,6 @@ class CanvasView extends ItemView {
             }
         });
         for (const file of canvas) {
-            console.log(file)
             content.createDiv({
                 cls: 'tree-item-self is-clickable outgoing-link-item',
                 attr: { 'draggable': true }
@@ -179,7 +183,7 @@ class CanvasView extends ItemView {
     }
 
     async onClose(): Promise<void> {
-        console.log('close view');
+        // console.log('close view');
     }
 }
 
