@@ -5,15 +5,13 @@ const VIEW_TYPE: string = "canvas-view"
 export default class CanvasViewPlugin extends Plugin {
 
     onload(): void {
+        console.log('load plugin') // enable plugin
+
         this.registerView(VIEW_TYPE, (leaf) => new CanvasView(leaf))
 
         this.addRibbonIcon("dice", "Load view", () => {
             this.onloadView();
         });
-    }
-
-    onunload(): void {
-        this.app.workspace.detachLeavesOfType(VIEW_TYPE);
     }
 
     async onloadView(): Promise<void> {
@@ -22,11 +20,17 @@ export default class CanvasViewPlugin extends Plugin {
         await this.app.workspace.getRightLeaf(false).setViewState({
             type: VIEW_TYPE,
             active: true,
-        });
+        }); // view#onOpen()
 
-        this.app.workspace.revealLeaf(
-            this.app.workspace.getLeavesOfType(VIEW_TYPE)[0]
-        );
+        // this.app.workspace.revealLeaf(
+        //     this.app.workspace.getLeavesOfType(VIEW_TYPE)[0]
+        // );
+    }
+
+    onunload(): void { 
+        console.log('unload plugin'); // disable plugin
+
+        this.app.workspace.detachLeavesOfType(VIEW_TYPE); // view#onClose()
     }
 }
 
@@ -45,17 +49,15 @@ class CanvasView extends ItemView {
     }
 
     async onOpen(): Promise<void> {
-        const container = this.containerEl;
-        container.empty();
-
         this.registerEvent(this.app.workspace.on('file-open', () => {
             this.getCanvas().then((canvas) => {
-                this.renderCanvas(canvas, container);
+                this.renderCanvas(canvas, this.containerEl);
             });
         }))
     }
 
     async getCanvas(): Promise<TFile[]> {
+        console.log('get canvas')
         const activeFile: TFile | null = this.app.workspace.getActiveFile();
         if (activeFile == null) {
             return [];
@@ -90,47 +92,48 @@ class CanvasView extends ItemView {
     }
 
     renderCanvas(canvas: TFile[], container: Element): void {
-        const header: HTMLDivElement = container.createDiv({
+        container.empty();
+
+        const pane: HTMLDivElement = container.createDiv({
             cls: 'outgoing-link-pane node-insert-event',
             attr: { 'style': 'position: relative;' },
         });
 
-        header.createDiv({
+        const header: HTMLDivElement = pane.createDiv({
             cls: 'tree-item-self is-clickable',
             attr: {
                 'aria-label': 'Click to collapse',
                 'aria-label-position': 'right'
             }
-        }, (el) => {
-            el.createSpan({ cls: 'tree-item-icon collapse-icon' }, (el) => {
-                el.createSvg('svg', {
-                    attr: {
-                        'xmlns': 'http://www.w3.org/2000/svg',
-                        'width': '10',
-                        'height': '10',
-                        'viewBox': '0 0 24 24',
-                        'fill': 'none',
-                        'stroke': 'currentColor',
-                        'stroke-width': '4',
-                        'stroke-linecap': 'round',
-                        'stroke-linejoin': 'round',
-                        'cls': 'svg-icon right-triangle',
-                    }
-                });
-            });
-            el.createDiv({
-                cls: 'tree-item-inner',
-                text: 'Canvas'
-            });
-            el.createDiv({ cls: 'tree-item-flair-outer' }, (el) => {
-                el.createSpan({
-                    cls: 'tree-item-flair',
-                    text: canvas.length.toString()
-                })
+        });
+        header.createSpan({ cls: 'tree-item-icon collapse-icon' }, (el) => {
+            el.createSvg('svg', {
+                attr: {
+                    'xmlns': 'http://www.w3.org/2000/svg',
+                    'width': '10',
+                    'height': '10',
+                    'viewBox': '0 0 24 24',
+                    'fill': 'none',
+                    'stroke': 'currentColor',
+                    'stroke-width': '4',
+                    'stroke-linecap': 'round',
+                    'stroke-linejoin': 'round',
+                    'cls': 'svg-icon right-triangle',
+                }
             });
         });
+        header.createDiv({
+            cls: 'tree-item-inner',
+            text: 'Canvas'
+        });
+        header.createDiv({ cls: 'tree-item-flair-outer' }, (el) => {
+            el.createSpan({
+                cls: 'tree-item-flair',
+                text: canvas.length.toString()
+            })
+        });
 
-        const content:HTMLDivElement = header.createDiv({ cls: 'search-result-container' });
+        const content: HTMLDivElement = pane.createDiv({ cls: 'search-result-container' });
         content.createDiv({
             attr: {
                 'style': 'width: 1px; height: 0.1px; margin-bottom: 0px;'
@@ -172,6 +175,10 @@ class CanvasView extends ItemView {
                 });
             });
         }
+    }
+
+    async onClose(): Promise<void> {
+        console.log('close view');
     }
 }
 
