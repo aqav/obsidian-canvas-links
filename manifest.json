@@ -1,8 +1,9 @@
 {
 	"id": "obsidian-canvas-view",
 	"name": "Canvas View",
-	"version": "0.0.1",
-	"description": "Show which canvas the active note embedded in",
+	"version": "1.0.0",
+	"minAppVersion": "1.1.0",
+	"description": "Show which canvas the active file embedded in",
 	"author": "aqav",
 	"authorUrl": "https://github.com/aqav",
 	"isDesktopOnly": false
