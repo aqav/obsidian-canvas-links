@@ -140,6 +140,7 @@ class CanvasView extends ItemView {
             }
         });
         for (const file of canvas) {
+            console.log(file)
             content.createDiv({
                 cls: 'tree-item-self is-clickable outgoing-link-item',
                 attr: { 'draggable': true }
@@ -169,7 +170,7 @@ class CanvasView extends ItemView {
                 });
                 el.createDiv({
                     cls: 'tree-item-inner',
-                    text: file.name
+                    text: file.basename
                 }).addEventListener('click', () => {
                     this.app.workspace.openLinkText('', file.path);
                 });
