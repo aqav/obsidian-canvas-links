@@ -9,6 +9,7 @@ export default class CanvasViewPlugin extends Plugin {
 
         this.registerView(VIEW_TYPE, (leaf) => new CanvasView(leaf));
 
+
         this.addCommand({
             id: 'show-canvas-view',
             name: 'Show canvas view',
@@ -64,6 +65,7 @@ class CanvasView extends ItemView {
 
     async getCanvas(): Promise<TFile[]> {
         const activeFile: TFile | null = this.app.workspace.getActiveFile();
+        console.log(activeFile)
         if (activeFile == null) {
             return [];
         }
@@ -87,7 +89,7 @@ class CanvasView extends ItemView {
         for (const [file, content] of canvasContent) {
             const nodes: node[] = JSON.parse(content).nodes;
             for (const node of nodes) {
-                if ('file' == node.type && activeFile.name == node.file) {
+                if ('file' == node.type && activeFile.path == node.file) {
                     canvasEmebeded.push(file);
                 }
             }
