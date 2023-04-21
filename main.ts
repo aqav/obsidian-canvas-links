@@ -1,4 +1,4 @@
-import { App, Editor, ItemView, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, WorkspaceLeaf } from 'obsidian';
+import { ItemView, Plugin, TFile, WorkspaceLeaf } from 'obsidian';
 
 const VIEW_TYPE: string = "canvas-view"
 
@@ -8,7 +8,6 @@ export default class CanvasViewPlugin extends Plugin {
         // console.log('load plugin') // enable plugin
 
         this.registerView(VIEW_TYPE, (leaf) => new CanvasView(leaf));
-
 
         this.addCommand({
             id: 'show-canvas-view',
