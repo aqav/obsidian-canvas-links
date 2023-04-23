@@ -1,7 +1,7 @@
 {
-	"name": "obsidian-canvas-view",
-	"version": "0.0.1",
-	"description": "Show which canvas the active note embedded in",
+	"name": "canvas-view",
+	"version": "1.0.0",
+	"description": "Show which canvases the current active file embedded in.",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
