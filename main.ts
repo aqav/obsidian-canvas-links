@@ -86,6 +86,9 @@ class CanvasView extends ItemView {
         const canvasEmebeded: TFile[] = [];
         for (const [file, content] of canvasContent) {
             const nodes: node[] = JSON.parse(content).nodes;
+            if (nodes == null) {
+                continue;
+            }
             for (const node of nodes) {
                 if ('file' == node.type && activeFile.path == node.file) {
                     canvasEmebeded.push(file);
