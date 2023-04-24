@@ -64,7 +64,6 @@ class CanvasView extends ItemView {
 
     async getCanvas(): Promise<TFile[]> {
         const activeFile: TFile | null = this.app.workspace.getActiveFile();
-        console.log(activeFile)
         if (activeFile == null) {
             return [];
         }
