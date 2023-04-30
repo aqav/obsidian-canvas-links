@@ -3,10 +3,10 @@ name: Bug Report
 about: Report a bug in obsidian-canvas-view
 ---
 
-** Describe the bug **
+**Describe the bug**
 
-** Step to reproduce **
+**Step to reproduce**
 
-** Expected behavivor **
+**Expected behavivor**
 
-** Additional information **
+**Additional information**
