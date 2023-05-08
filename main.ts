@@ -30,7 +30,7 @@ export default class CanvasViewPlugin extends Plugin {
     onunload(): void {
         // console.log('unload plugin'); // disable plugin
 
-        this.app.workspace.detachLeavesOfType(VIEW_TYPE); // view#onClose()
+        // this.app.workspace.detachLeavesOfType(VIEW_TYPE); // view#onClose()
     }
 }
 
