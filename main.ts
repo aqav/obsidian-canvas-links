@@ -1,4 +1,4 @@
-import { ItemView, Plugin, TFile, WorkspaceLeaf } from 'obsidian';
+import { ItemView, Plugin, TFile, WorkspaceLeaf, setIcon } from 'obsidian';
 
 const VIEW_TYPE: string = "canvas-view"
 
@@ -114,22 +114,7 @@ class CanvasView extends ItemView {
                 'aria-label-position': 'right'
             }
         });
-        header.createSpan({ cls: 'tree-item-icon collapse-icon' }, (el) => {
-            el.createSvg('svg', {
-                attr: {
-                    'xmlns': 'http://www.w3.org/2000/svg',
-                    'width': '10',
-                    'height': '10',
-                    'viewBox': '0 0 24 24',
-                    'fill': 'none',
-                    'stroke': 'currentColor',
-                    'stroke-width': '4',
-                    'stroke-linecap': 'round',
-                    'stroke-linejoin': 'round',
-                    'cls': 'svg-icon right-triangle',
-                }
-            });
-        });
+        header.createSpan({ cls: 'tree-item-icon collapse-icon' });
         header.createDiv({
             cls: 'tree-item-inner',
             text: 'Canvas'
@@ -153,27 +138,7 @@ class CanvasView extends ItemView {
                 attr: { 'draggable': true }
             }, (el) => {
                 el.createSpan({ cls: 'tree-item-icon' }, (el) => {
-                    el.createSvg('svg', {
-                        attr: {
-                            'xmlns': 'http://www.w3.org/2000/svg',
-                            'width': '16',
-                            'height': '16',
-                            'viewBox': '0 0 24 24',
-                            'fill': 'none',
-                            'stroke': 'currentColor',
-                            'stroke-width': '2',
-                            'stroke-linecap': 'round',
-                            'stroke-linejoin': 'round',
-                            'cls': 'svg-icon lucide-link',
-                        }
-                    }, (el) => {
-                        el.createSvg('path', {
-                            attr: { 'd': 'M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71' }
-                        });
-                        el.createSvg('path', {
-                            attr: { 'd': 'M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71' }
-                        });
-                    });
+                    setIcon(el, 'link');
                 });
                 el.createDiv({
                     cls: 'tree-item-inner',
