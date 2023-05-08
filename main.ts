@@ -1,67 +1,139 @@
 import { ItemView, Plugin, TFile, WorkspaceLeaf, setIcon } from 'obsidian';
 
-const VIEW_TYPE: string = "canvas-view"
+const OUTGOING_LINK_VIEW_TYPE: string = "outgoing-link-canvas-view"
+const BACKLINK_VIEW_TYPE: string = "backlink-canvas-view"
 
 export default class CanvasViewPlugin extends Plugin {
 
     onload(): void {
         // console.log('load plugin') // enable plugin
 
-        this.registerView(VIEW_TYPE, (leaf) => new CanvasView(leaf));
+        this.registerView(OUTGOING_LINK_VIEW_TYPE, (leaf) => new OutgoingLinkView(leaf));
+        this.registerView(BACKLINK_VIEW_TYPE, (leaf) => new BacklinkView(leaf));
 
         this.addCommand({
             id: 'show-canvas-view',
             name: 'Show canvas view',
             callback: () => {
-                this.onloadView();
+                this.onloadOutgoingLinkView();
+                this.onloadBacklinkView();
             }
         });
     }
 
-    async onloadView(): Promise<void> {
-        this.app.workspace.detachLeavesOfType(VIEW_TYPE);
+    async onloadOutgoingLinkView(): Promise<void> {
+        this.app.workspace.detachLeavesOfType(OUTGOING_LINK_VIEW_TYPE);
 
         await this.app.workspace.getRightLeaf(false).setViewState({
-            type: VIEW_TYPE,
+            type: OUTGOING_LINK_VIEW_TYPE,
+            active: true,
+        }); // view#onOpen()
+    }
+
+    async onloadBacklinkView(): Promise<void> {
+        this.app.workspace.detachLeavesOfType(BACKLINK_VIEW_TYPE);
+
+        await this.app.workspace.getRightLeaf(false).setViewState({
+            type: BACKLINK_VIEW_TYPE,
             active: true,
         }); // view#onOpen()
     }
 
     onunload(): void {
         // console.log('unload plugin'); // disable plugin
-
-        // this.app.workspace.detachLeavesOfType(VIEW_TYPE); // view#onClose()
     }
 }
 
-class CanvasView extends ItemView {
+class OutgoingLinkView extends ItemView {
+
+    getViewType(): string {
+        return OUTGOING_LINK_VIEW_TYPE;
+    }
+
+    getDisplayText(): string {
+        return "Outgoing Link Canvas";
+    }
+
+    async onOpen(): Promise<void> {
+        this.icon = 'chevron-right-square'
+
+        this.getNotes().then((notes) => {
+            renderFiles(notes, 'Notes', this.containerEl);
+        });
+
+        this.registerEvent(this.app.workspace.on('file-open', () => {
+            this.getNotes().then((notes) => {
+                renderFiles(notes, 'Notes', this.containerEl);
+            });
+        }));
+    }
+
+    async getNotes(): Promise<TFile[]> {
+        const activeFile: TFile | null = this.app.workspace.getActiveFile();
+        if (activeFile == null || 'canvas' != activeFile.extension) {
+            return [];
+        }
+
+        let canvasContent = '';
+        await this.app.vault.read(activeFile).then((content: string) => {
+            canvasContent = content;
+        });
+
+        const nodes: node[] = JSON.parse(canvasContent).nodes;
+        if (nodes == null) {
+            return [];
+        }
+        const notePaths: string[] = [];
+        for (const node of nodes) {
+            if ('file' == node.type) {
+                notePaths.push(node.file);
+            }
+        }
+
+        const notes: TFile[] = [];
+        const files: TFile[] = this.app.vault.getFiles();
+        for (const file of files) {
+            if (notePaths.contains(file.path)) {
+                notes.push(file);
+            }
+        }
+
+        return notes;
+    }
+
+    async onClose(): Promise<void> {
+        // console.log('close view');
+    }
+}
+
+class BacklinkView extends ItemView {
 
     constructor(leaf: WorkspaceLeaf) {
         super(leaf);
     }
 
     getViewType(): string {
-        return VIEW_TYPE;
+        return BACKLINK_VIEW_TYPE;
     }
 
     getDisplayText(): string {
-        return "Canvas View";
+        return "Backlink Canvas";
     }
 
     async onOpen(): Promise<void> {
         // console.log('open view');
-      
+
         this.icon = 'chevron-left-square'
 
         this.getCanvas().then((canvas) => {
-            this.renderCanvas(canvas, this.containerEl);
+            renderFiles(canvas, 'Canvas', this.containerEl);
         });
 
         this.registerEvent(this.app.workspace.on('file-open', () => {
             this.getCanvas().then((canvas) => {
-                this.renderCanvas(canvas, this.containerEl);
+                renderFiles(canvas, 'Canvas',this.containerEl);
             });
-        }))
+        }));
     }
 
     async getCanvas(): Promise<TFile[]> {
@@ -101,59 +173,59 @@ class CanvasView extends ItemView {
         return canvasEmebeded;
     }
 
-    renderCanvas(canvas: TFile[], container: Element): void {
-        container.empty();
-
-        const pane: HTMLDivElement = container.createDiv({
-            cls: 'outgoing-link-pane node-insert-event',
-            attr: { 'style': 'position: relative;' },
-        });
-
-        const header: HTMLDivElement = pane.createDiv({
-            cls: 'tree-item-self is-clickable',
-            attr: {
-                'aria-label': 'Click to collapse',
-                'aria-label-position': 'right'
-            }
-        });
-        header.createSpan({ cls: 'tree-item-icon collapse-icon' });
-        header.createDiv({
-            cls: 'tree-item-inner',
-            text: 'Canvas'
-        });
-        header.createDiv({ cls: 'tree-item-flair-outer' }, (el) => {
-            el.createSpan({
-                cls: 'tree-item-flair',
-                text: canvas.length.toString()
-            })
-        });
-
-        const content: HTMLDivElement = pane.createDiv({ cls: 'search-result-container' });
-        content.createDiv({
-            attr: {
-                'style': 'width: 1px; height: 0.1px; margin-bottom: 0px;'
-            }
-        });
-        for (const file of canvas) {
-            content.createDiv({
-                cls: 'tree-item-self is-clickable outgoing-link-item',
-                attr: { 'draggable': true }
-            }, (el) => {
-                el.createSpan({ cls: 'tree-item-icon' }, (el) => {
-                    setIcon(el, 'link');
-                });
-                el.createDiv({
-                    cls: 'tree-item-inner',
-                    text: file.basename
-                }).addEventListener('click', () => {
-                    this.app.workspace.openLinkText('', file.path);
-                });
-            });
-        }
-    }
-
     async onClose(): Promise<void> {
         // console.log('close view');
+    }
+}
+
+function renderFiles(files: TFile[], viewText: string,  container: Element): void {
+    container.empty();
+
+    const pane: HTMLDivElement = container.createDiv({
+        cls: 'outgoing-link-pane node-insert-event',
+        attr: { 'style': 'position: relative;' },
+    });
+
+    const header: HTMLDivElement = pane.createDiv({
+        cls: 'tree-item-self is-clickable',
+        attr: {
+            'aria-label': 'Click to collapse',
+            'aria-label-position': 'right'
+        }
+    });
+    header.createSpan({ cls: 'tree-item-icon collapse-icon' });
+    header.createDiv({
+        cls: 'tree-item-inner',
+        text: viewText
+    });
+    header.createDiv({ cls: 'tree-item-flair-outer' }, (el) => {
+        el.createSpan({
+            cls: 'tree-item-flair',
+            text: files.length.toString()
+        })
+    });
+
+    const content: HTMLDivElement = pane.createDiv({ cls: 'search-result-container' });
+    content.createDiv({
+        attr: {
+            'style': 'width: 1px; height: 0.1px; margin-bottom: 0px;'
+        }
+    });
+    for (const file of files) {
+        content.createDiv({
+            cls: 'tree-item-self is-clickable outgoing-link-item',
+            attr: { 'draggable': true }
+        }, (el) => {
+            el.createSpan({ cls: 'tree-item-icon' }, (el) => {
+                setIcon(el, 'link');
+            });
+            el.createDiv({
+                cls: 'tree-item-inner',
+                text: file.basename
+            }).addEventListener('click', () => {
+                this.app.workspace.openLinkText('', file.path);
+            });
+        });
     }
 }
 
