@@ -50,6 +50,8 @@ class CanvasView extends ItemView {
 
     async onOpen(): Promise<void> {
         // console.log('open view');
+      
+        this.icon = 'chevron-left-square'
 
         this.getCanvas().then((canvas) => {
             this.renderCanvas(canvas, this.containerEl);
