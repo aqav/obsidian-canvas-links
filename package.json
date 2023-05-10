@@ -1,6 +1,6 @@
 {
 	"name": "canvas-more",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"description": "Add more stuff to make canvas better in Obsidian.",
 	"main": "main.js",
 	"scripts": {
