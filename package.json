@@ -1,7 +1,7 @@
 {
-	"name": "canvas-view",
+	"name": "canvas-more",
 	"version": "1.0.0",
-	"description": "Show which canvases the current active file embedded in.",
+	"description": "Add more stuff to make canvas in obsidian better.",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",

@@ -1,9 +1,9 @@
 {
-	"id": "canvas-view",
-	"name": "Canvas View",
+	"id": "canvas-more",
+	"name": "Canvas More",
 	"version": "1.0.0",
 	"minAppVersion": "1.1.0",
-	"description": "Show which canvases the current active file embedded in.",
+	"description": "Add more stuff to make canvas in obsidian better.",
 	"author": "aqav",
 	"authorUrl": "https://github.com/aqav",
 	"isDesktopOnly": false

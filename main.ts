@@ -1,40 +1,40 @@
 import { ItemView, Plugin, TFile, WorkspaceLeaf, setIcon } from 'obsidian';
 
-const OUTGOING_LINK_VIEW_TYPE: string = "outgoing-link-canvas-view"
-const BACKLINK_VIEW_TYPE: string = "backlink-canvas-view"
+const FILE_VIEW_TYPE: string = "file-view-type"
+const CANVAS_VIEW_TYPE: string = "canvas-view-type"
 
-export default class CanvasViewPlugin extends Plugin {
+export default class CanvasMorePlugin extends Plugin {
 
     onload(): void {
         // console.log('load plugin') // enable plugin
 
-        this.registerView(OUTGOING_LINK_VIEW_TYPE, (leaf) => new OutgoingLinkView(leaf));
-        this.registerView(BACKLINK_VIEW_TYPE, (leaf) => new BacklinkView(leaf));
+        this.registerView(FILE_VIEW_TYPE, (leaf) => new FileView(leaf));
+        this.registerView(CANVAS_VIEW_TYPE, (leaf) => new CanvasView(leaf));
 
         this.addCommand({
-            id: 'show-canvas-view',
-            name: 'Show canvas view',
+            id: 'use-canvas-more',
+            name: 'Use canvas more',
             callback: () => {
-                this.onloadOutgoingLinkView();
-                this.onloadBacklinkView();
+                this.onloadFileView();
+                this.onloadCanvasView();
             }
         });
     }
 
-    async onloadOutgoingLinkView(): Promise<void> {
-        this.app.workspace.detachLeavesOfType(OUTGOING_LINK_VIEW_TYPE);
+    async onloadFileView(): Promise<void> {
+        this.app.workspace.detachLeavesOfType(FILE_VIEW_TYPE);
 
         await this.app.workspace.getRightLeaf(false).setViewState({
-            type: OUTGOING_LINK_VIEW_TYPE,
+            type: FILE_VIEW_TYPE,
             active: true,
         }); // view#onOpen()
     }
 
-    async onloadBacklinkView(): Promise<void> {
-        this.app.workspace.detachLeavesOfType(BACKLINK_VIEW_TYPE);
+    async onloadCanvasView(): Promise<void> {
+        this.app.workspace.detachLeavesOfType(CANVAS_VIEW_TYPE);
 
         await this.app.workspace.getRightLeaf(false).setViewState({
-            type: BACKLINK_VIEW_TYPE,
+            type: CANVAS_VIEW_TYPE,
             active: true,
         }); // view#onOpen()
     }
@@ -44,31 +44,31 @@ export default class CanvasViewPlugin extends Plugin {
     }
 }
 
-class OutgoingLinkView extends ItemView {
+class FileView extends ItemView {
 
     getViewType(): string {
-        return OUTGOING_LINK_VIEW_TYPE;
+        return FILE_VIEW_TYPE;
     }
 
     getDisplayText(): string {
-        return "Outgoing Link Canvas";
+        return "Files View";
     }
 
     async onOpen(): Promise<void> {
         this.icon = 'chevron-right-square'
 
-        this.getNotes().then((notes) => {
-            renderFiles(notes, 'Notes', this.containerEl);
+        this.getFiles().then((notes) => {
+            renderView(notes, 'Files the canvas contain', this.containerEl);
         });
 
         this.registerEvent(this.app.workspace.on('file-open', () => {
-            this.getNotes().then((notes) => {
-                renderFiles(notes, 'Notes', this.containerEl);
+            this.getFiles().then((notes) => {
+                renderView(notes, 'Files the canvas contain', this.containerEl);
             });
         }));
     }
 
-    async getNotes(): Promise<TFile[]> {
+    async getFiles(): Promise<TFile[]> {
         const activeFile: TFile | null = this.app.workspace.getActiveFile();
         if (activeFile == null || 'canvas' != activeFile.extension) {
             return [];
@@ -83,22 +83,22 @@ class OutgoingLinkView extends ItemView {
         if (nodes == null) {
             return [];
         }
-        const notePaths: string[] = [];
+        const filePaths: string[] = [];
         for (const node of nodes) {
             if ('file' == node.type) {
-                notePaths.push(node.file);
+                filePaths.push(node.file);
             }
         }
 
-        const notes: TFile[] = [];
-        const files: TFile[] = this.app.vault.getFiles();
-        for (const file of files) {
-            if (notePaths.contains(file.path)) {
-                notes.push(file);
+        const files: TFile[] = [];
+        const all: TFile[] = this.app.vault.getFiles();
+        for (const file of all) {
+            if (filePaths.contains(file.path)) {
+                files.push(file);
             }
         }
 
-        return notes;
+        return files;
     }
 
     async onClose(): Promise<void> {
@@ -106,18 +106,18 @@ class OutgoingLinkView extends ItemView {
     }
 }
 
-class BacklinkView extends ItemView {
+class CanvasView extends ItemView {
 
     constructor(leaf: WorkspaceLeaf) {
         super(leaf);
     }
 
     getViewType(): string {
-        return BACKLINK_VIEW_TYPE;
+        return CANVAS_VIEW_TYPE;
     }
 
     getDisplayText(): string {
-        return "Backlink Canvas";
+        return "Canvas View";
     }
 
     async onOpen(): Promise<void> {
@@ -126,12 +126,12 @@ class BacklinkView extends ItemView {
         this.icon = 'chevron-left-square'
 
         this.getCanvas().then((canvas) => {
-            renderFiles(canvas, 'Canvas', this.containerEl);
+            renderView(canvas, 'Canvas the file embedded', this.containerEl);
         });
 
         this.registerEvent(this.app.workspace.on('file-open', () => {
             this.getCanvas().then((canvas) => {
-                renderFiles(canvas, 'Canvas',this.containerEl);
+                renderView(canvas, 'Canvas the file embedded',this.containerEl);
             });
         }));
     }
@@ -143,8 +143,8 @@ class BacklinkView extends ItemView {
         }
 
         const canvas: TFile[] = [];
-        const files: TFile[] = this.app.vault.getFiles();
-        for (const file of files) {
+        const all: TFile[] = this.app.vault.getFiles();
+        for (const file of all) {
             if ('canvas' == file.extension) {
                 canvas.push(file);
             }
@@ -178,7 +178,7 @@ class BacklinkView extends ItemView {
     }
 }
 
-function renderFiles(files: TFile[], viewText: string,  container: Element): void {
+function renderView(files: TFile[], text: string,  container: Element): void {
     container.empty();
 
     const pane: HTMLDivElement = container.createDiv({
@@ -196,7 +196,7 @@ function renderFiles(files: TFile[], viewText: string,  container: Element): voi
     header.createSpan({ cls: 'tree-item-icon collapse-icon' });
     header.createDiv({
         cls: 'tree-item-inner',
-        text: viewText
+        text: text
     });
     header.createDiv({ cls: 'tree-item-flair-outer' }, (el) => {
         el.createSpan({
