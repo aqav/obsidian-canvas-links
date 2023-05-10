@@ -3,7 +3,7 @@
 	"name": "Canvas More",
 	"version": "1.0.0",
 	"minAppVersion": "1.1.0",
-	"description": "Add more stuff to make canvas in obsidian better.",
+	"description": "Add more stuff to make canvas better in Obsidian.",
 	"author": "aqav",
 	"authorUrl": "https://github.com/aqav",
 	"isDesktopOnly": false

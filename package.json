@@ -1,7 +1,7 @@
 {
 	"name": "canvas-more",
 	"version": "1.0.0",
-	"description": "Add more stuff to make canvas in obsidian better.",
+	"description": "Add more stuff to make canvas better in Obsidian.",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
