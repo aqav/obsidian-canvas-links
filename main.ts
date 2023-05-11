@@ -13,7 +13,7 @@ export default class CanvasMorePlugin extends Plugin {
 
         this.addCommand({
             id: 'use-canvas-more',
-            name: 'Use canvas more',
+            name: 'Start',
             callback: () => {
                 this.onloadFileView();
                 this.onloadCanvasView();
