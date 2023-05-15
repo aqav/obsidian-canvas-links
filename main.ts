@@ -1,40 +1,47 @@
 import { ItemView, Plugin, TFile, WorkspaceLeaf, setIcon } from 'obsidian';
 
-const FILE_VIEW_TYPE: string = "file-view-type"
-const CANVAS_VIEW_TYPE: string = "canvas-view-type"
+const FILE_VIEW: string = "file-view"
+const CANVAS_VIEW: string = "canvas-view"
 
 export default class CanvasMorePlugin extends Plugin {
 
     onload(): void {
         // console.log('load plugin') // enable plugin
 
-        this.registerView(FILE_VIEW_TYPE, (leaf) => new FileView(leaf));
-        this.registerView(CANVAS_VIEW_TYPE, (leaf) => new CanvasView(leaf));
+        this.registerView(FILE_VIEW, (leaf) => new FileView(leaf));
+        this.registerView(CANVAS_VIEW, (leaf) => new CanvasView(leaf));
 
         this.addCommand({
-            id: 'use-canvas-more',
-            name: 'Start',
+            id: FILE_VIEW,
+            name: 'Show which files the active canvas contains',
             callback: () => {
                 this.onloadFileView();
+            }
+        });
+
+        this.addCommand({
+            id: CANVAS_VIEW,
+            name: 'Show which canvases the active file embedded',
+            callback: () => {
                 this.onloadCanvasView();
             }
         });
     }
 
     async onloadFileView(): Promise<void> {
-        this.app.workspace.detachLeavesOfType(FILE_VIEW_TYPE);
+        this.app.workspace.detachLeavesOfType(FILE_VIEW);
 
         await this.app.workspace.getRightLeaf(false).setViewState({
-            type: FILE_VIEW_TYPE,
+            type: FILE_VIEW,
             active: true,
         }); // view#onOpen()
     }
 
     async onloadCanvasView(): Promise<void> {
-        this.app.workspace.detachLeavesOfType(CANVAS_VIEW_TYPE);
+        this.app.workspace.detachLeavesOfType(CANVAS_VIEW);
 
         await this.app.workspace.getRightLeaf(false).setViewState({
-            type: CANVAS_VIEW_TYPE,
+            type: CANVAS_VIEW,
             active: true,
         }); // view#onOpen()
     }
@@ -47,7 +54,7 @@ export default class CanvasMorePlugin extends Plugin {
 class FileView extends ItemView {
 
     getViewType(): string {
-        return FILE_VIEW_TYPE;
+        return FILE_VIEW;
     }
 
     getDisplayText(): string {
@@ -113,7 +120,7 @@ class CanvasView extends ItemView {
     }
 
     getViewType(): string {
-        return CANVAS_VIEW_TYPE;
+        return CANVAS_VIEW;
     }
 
     getDisplayText(): string {
@@ -131,7 +138,7 @@ class CanvasView extends ItemView {
 
         this.registerEvent(this.app.workspace.on('file-open', () => {
             this.getCanvas().then((canvas) => {
-                renderView(canvas, 'Canvas the file embedded',this.containerEl);
+                renderView(canvas, 'Canvas the file embedded', this.containerEl);
             });
         }));
     }
@@ -178,7 +185,7 @@ class CanvasView extends ItemView {
     }
 }
 
-function renderView(files: TFile[], text: string,  container: Element): void {
+function renderView(files: TFile[], text: string, container: Element): void {
     container.empty();
 
     const pane: HTMLDivElement = container.createDiv({
