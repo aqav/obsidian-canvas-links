@@ -1,6 +1,6 @@
-# Canvas More
+# Canvas View
 
-The plugin add more stuff to make canvas better in [Obsidian](https://obsidian.md/). Enable the plugin and select command `Canvas More: Start` to start
+The plugin add views to make canvas better in [Obsidian](https://obsidian.md/). Enable the plugin and select command start with `Canvas View:`.
 
 - Register a view to show **Which canvases the active file embedded** like the backlinks of canvas for it
 - Register a view to show **Which files the active canvas contains** like the outgoing links of canvas from it

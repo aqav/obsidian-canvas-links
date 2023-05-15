@@ -1,9 +1,9 @@
 {
-	"id": "canvas-more",
-	"name": "Canvas More",
-	"version": "1.1.0",
+	"id": "canvas-view",
+	"name": "Canvas View",
+	"version": "1.1.1",
 	"minAppVersion": "1.1.0",
-	"description": "Add more stuff to make canvas better in Obsidian.",
+	"description": "Add views to make canvas better in Obsidian.",
 	"author": "aqav",
 	"authorUrl": "https://github.com/aqav",
 	"isDesktopOnly": false
