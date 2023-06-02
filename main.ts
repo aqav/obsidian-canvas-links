@@ -29,21 +29,21 @@ export default class CanvasMorePlugin extends Plugin {
     }
 
     async onloadFileView(): Promise<void> {
-        this.app.workspace.detachLeavesOfType(FILE_VIEW);
-
-        await this.app.workspace.getRightLeaf(false).setViewState({
-            type: FILE_VIEW,
-            active: true,
-        }); // view#onOpen()
+        if (this.app.workspace.getLeavesOfType(FILE_VIEW).length == 0) {
+            await this.app.workspace.getRightLeaf(false).setViewState({
+                type: FILE_VIEW,
+                active: true,
+            }); // view#onOpen()
+        }
     }
 
     async onloadCanvasView(): Promise<void> {
-        this.app.workspace.detachLeavesOfType(CANVAS_VIEW);
-
-        await this.app.workspace.getRightLeaf(false).setViewState({
-            type: CANVAS_VIEW,
-            active: true,
-        }); // view#onOpen()
+        if (this.app.workspace.getLeavesOfType(CANVAS_VIEW).length == 0) {
+            await this.app.workspace.getRightLeaf(false).setViewState({
+                type: CANVAS_VIEW,
+                active: true,
+            }); // view#onOpen()
+        }
     }
 
     onunload(): void {
@@ -52,6 +52,10 @@ export default class CanvasMorePlugin extends Plugin {
 }
 
 class FileView extends ItemView {
+
+    constructor(leaf: WorkspaceLeaf) {
+        super(leaf);
+    }
 
     getViewType(): string {
         return FILE_VIEW;
