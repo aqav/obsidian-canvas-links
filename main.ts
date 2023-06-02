@@ -82,7 +82,7 @@ class FileView extends ItemView {
         }
 
         let canvasContent = '';
-        await this.app.vault.read(activeFile).then((content: string) => {
+        await this.app.vault.cachedRead(activeFile).then((content: string) => {
             canvasContent = content;
         });
 
@@ -159,7 +159,7 @@ class CanvasView extends ItemView {
 
         const canvasContent: Map<TFile, string> = new Map<TFile, string>();
         for (const file of canvas) {
-            await this.app.vault.read(file).then((content: string) => {
+            await this.app.vault.cachedRead(file).then((content: string) => {
                 canvasContent.set(file, content);
             });
         }
