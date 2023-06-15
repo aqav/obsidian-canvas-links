@@ -1,6 +1,6 @@
-# Canvas View
+# Canvas Links
 
-The plugin add views to make canvas better in [Obsidian](https://obsidian.md/). Enable the plugin and select command start with `Canvas View:`.
+The plugin add views to show "outgoing links" and "backlinks" of canvas in [Obsidian](https://obsidian.md/). Enable the plugin and select command start with `Canvas Links:`.
 
 - Register a view to show **Which canvases the active file embedded** like the backlinks of canvas for it
 - Register a view to show **Which files the active canvas contains** like the outgoing links of canvas from it

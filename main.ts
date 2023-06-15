@@ -3,7 +3,7 @@ import { ItemView, Plugin, TFile, WorkspaceLeaf, setIcon } from 'obsidian';
 const FILE_VIEW: string = "file-view"
 const CANVAS_VIEW: string = "canvas-view"
 
-export default class CanvasMorePlugin extends Plugin {
+export default class CanvasLinksPlugin extends Plugin {
 
     onload(): void {
         // console.log('load plugin') // enable plugin

@@ -1,7 +1,7 @@
 {
-	"name": "canvas-view",
-	"version": "1.1.1",
-	"description": "Add views to make canvas better in Obsidian.",
+	"name": "canvas-links",
+	"version": "1.1.2",
+	"description": "Add views to show \"outgoing links\" and \"backlinks\" of canvas in Obsidian.",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
