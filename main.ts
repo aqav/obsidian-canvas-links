@@ -13,7 +13,7 @@ export default class CanvasLinksPlugin extends Plugin {
 
         this.addCommand({
             id: FILE_VIEW,
-            name: 'Show which files the active canvas contains',
+            name: 'Show "outgoing links" of canvas (which files the active canvas contains)',
             callback: () => {
                 this.onloadFileView();
             }
@@ -21,7 +21,7 @@ export default class CanvasLinksPlugin extends Plugin {
 
         this.addCommand({
             id: CANVAS_VIEW,
-            name: 'Show which canvases the active file embedded',
+            name: 'Show "backlinks" of canvas (which canvases the active file embedded)',
             callback: () => {
                 this.onloadCanvasView();
             }
