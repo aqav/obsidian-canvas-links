@@ -2,6 +2,7 @@ import { ItemView, Plugin, TFile, WorkspaceLeaf, setIcon } from 'obsidian';
 
 const FILE_VIEW: string = "file-view"
 const CANVAS_VIEW: string = "canvas-view"
+const ALL_VIEW: string = "all-view"
 
 export default class CanvasLinksPlugin extends Plugin {
 
@@ -23,6 +24,15 @@ export default class CanvasLinksPlugin extends Plugin {
             id: CANVAS_VIEW,
             name: 'Show "backlinks" of canvas (which canvases the active file embedded)',
             callback: () => {
+                this.onloadCanvasView();
+            }
+        });
+
+        this.addCommand({
+            id: ALL_VIEW,
+            name: 'Show "outgoing links" and "backlinks" of canvas',
+            callback: () => {
+                this.onloadFileView();
                 this.onloadCanvasView();
             }
         });
