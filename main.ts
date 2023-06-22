@@ -1,4 +1,4 @@
-import { ItemView, Plugin, TFile, WorkspaceLeaf, setIcon } from 'obsidian';
+import { ItemView, Plugin, TAbstractFile, TFile, WorkspaceLeaf, setIcon } from 'obsidian';
 
 const FILE_VIEW: string = "file-view"
 const CANVAS_VIEW: string = "canvas-view"
@@ -89,7 +89,7 @@ class FileView extends ItemView {
         }));
     }
 
-    async getFiles(): Promise<TFile[]> {
+    async getFiles(): Promise<TAbstractFile[]> {
         const activeCanvas: TFile | null = this.app.workspace.getActiveFile();
         if (activeCanvas == null || 'canvas' != activeCanvas.extension) {
             return [];
@@ -111,10 +111,17 @@ class FileView extends ItemView {
             }
         }
 
-        const files: TFile[] = [];
-        const all: TFile[] = this.app.vault.getFiles();
-        for (const file of all) {
-            if (filePaths.contains(file.path)) {
+        // const files: TFile[] = [];
+        // const all: TFile[] = this.app.vault.getFiles();
+        // for (const file of all) {
+        //     if (filePaths.contains(file.path)) {
+        //         files.push(file);
+        //     }
+        // }
+        const files: TAbstractFile[] = [];
+        for (const filePath of filePaths) {
+            const file = this.app.vault.getAbstractFileByPath(filePath);
+            if (file != null) {
                 files.push(file);
             }
         }
@@ -199,7 +206,7 @@ class CanvasView extends ItemView {
     }
 }
 
-function renderView(files: TFile[], text: string, container: Element): void {
+function renderView(files: TAbstractFile[], text: string, container: Element): void {
     container.empty();
 
     const pane: HTMLDivElement = container.createDiv({
@@ -242,7 +249,7 @@ function renderView(files: TFile[], text: string, container: Element): void {
             });
             el.createDiv({
                 cls: 'tree-item-inner',
-                text: file.basename
+                text: file.name.substring(0, file.name.lastIndexOf("."))
             }).addEventListener('click', () => {
                 this.app.workspace.openLinkText('', file.path);
             });
