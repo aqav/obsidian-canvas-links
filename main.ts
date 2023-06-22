@@ -90,13 +90,13 @@ class FileView extends ItemView {
     }
 
     async getFiles(): Promise<TFile[]> {
-        const activeFile: TFile | null = this.app.workspace.getActiveFile();
-        if (activeFile == null || 'canvas' != activeFile.extension) {
+        const activeCanvas: TFile | null = this.app.workspace.getActiveFile();
+        if (activeCanvas == null || 'canvas' != activeCanvas.extension) {
             return [];
         }
 
         let canvasContent = '';
-        await this.app.vault.cachedRead(activeFile).then((content: string) => {
+        await this.app.vault.cachedRead(activeCanvas).then((content: string) => {
             canvasContent = content;
         });
 
