@@ -1,4 +1,4 @@
-# Canvas Links - build link between file and canvas by "embed"
+# Canvas Links - Show “link” between canvas and embedded file
 
 Obsidian uses the double bracket syntax(`[[]]`) to link two notes. Similarly, the files embedded in the Canvas could be logically "linked" to the Canvas. they can be considered to be "Outgoing Links" of the Canvas. Correspondingly, the Canvas can be regarded as "Backlinks" of the file.
 
