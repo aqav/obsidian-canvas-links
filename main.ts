@@ -154,12 +154,12 @@ class CanvasView extends ItemView {
         this.icon = 'chevron-left-square'
 
         this.getCanvas().then((canvas) => {
-            renderView(canvas, 'Canvases embedding the file', this.containerEl);
+            renderView(canvas, 'Canvas the file embedded', this.containerEl);
         });
 
         this.registerEvent(this.app.workspace.on('file-open', () => {
             this.getCanvas().then((canvas) => {
-                renderView(canvas, 'Canvases embedding the file', this.containerEl);
+                renderView(canvas, 'Canvas the file embedded', this.containerEl);
             });
         }));
     }
