@@ -56,19 +56,19 @@ class FileView extends ItemView {
     }
 
     getDisplayText(): string {
-        return "Files View";
+        return "Files";
     }
 
     async onOpen(): Promise<void> {
         this.icon = 'chevron-right-square'
 
         this.getFiles().then((notes) => {
-            renderView(notes, 'Files the canvas contain', this.containerEl);
+            renderView(notes, 'Files', this.containerEl);
         });
 
         this.registerEvent(this.app.workspace.on('file-open', () => {
             this.getFiles().then((notes) => {
-                renderView(notes, 'Files the canvas contain', this.containerEl);
+                renderView(notes, 'Files', this.containerEl);
             });
         }));
     }
@@ -129,7 +129,7 @@ class CanvasView extends ItemView {
     }
 
     getDisplayText(): string {
-        return "Canvas View";
+        return "Canvas";
     }
 
     async onOpen(): Promise<void> {
@@ -138,12 +138,12 @@ class CanvasView extends ItemView {
         this.icon = 'chevron-left-square'
 
         this.getCanvas().then((canvas) => {
-            renderView(canvas, 'Canvas the file embedded', this.containerEl);
+            renderView(canvas, 'Canvases', this.containerEl);
         });
 
         this.registerEvent(this.app.workspace.on('file-open', () => {
             this.getCanvas().then((canvas) => {
-                renderView(canvas, 'Canvas the file embedded', this.containerEl);
+                renderView(canvas, 'Canvases', this.containerEl);
             });
         }));
     }

@@ -1,12 +1,7 @@
-# Canvas Links - Show "link" between canvas and embedded file
+# Canvas Links
 
-Obsidian uses the double bracket syntax(`[[]]`) to link two notes. Similarly, the files embedded in the Canvas could be logically "linked" to the Canvas. they can be considered to be "Outgoing Links" of the Canvas. Correspondingly, the Canvas can be regarded as "Backlinks" of the file.
+Show the links between "Canvas" and "File". Support all filetype in the [Obsidian Vault](https://obsidian.md/).
 
-The plugin adds views to show "outgoing links" and "backlinks" of canvas in [Obsidian](https://obsidian.md/). Enable the plugin and select the command starting with `Canvas Links:`.
-
-- Register a view to show "outgoing links" files of the canvas (**Which files the current canvas contains**)
-- Register a view to show "backlinks" canvases of the file (**Which canvases the current file embedded**)
-- Support click an item in view to redirect the current file to it and change the view content accordingly
-- Support all filetype that [Obsidian accepted](https://help.obsidian.md/Advanced+topics/Accepted+file+formats)
+The plugin is available in [Obsidian Community Plugins](https://obsidian.md/plugins). After install, open command palette to enable this plugin, then the views will be default registered in the right panel. Wish you like it :)
 
 ![demo](./image/demo.gif)
