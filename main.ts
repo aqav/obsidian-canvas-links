@@ -13,24 +13,8 @@ export default class CanvasLinksPlugin extends Plugin {
         this.registerView(CANVAS_VIEW, (leaf) => new CanvasView(leaf));
 
         this.addCommand({
-            id: FILE_VIEW,
-            name: 'Show "outgoing links" of canvas (which files the active canvas contains)',
-            callback: () => {
-                this.onloadFileView();
-            }
-        });
-
-        this.addCommand({
-            id: CANVAS_VIEW,
-            name: 'Show "backlinks" of canvas (which canvases the active file embedded)',
-            callback: () => {
-                this.onloadCanvasView();
-            }
-        });
-
-        this.addCommand({
             id: ALL_VIEW,
-            name: 'Show "outgoing links" and "backlinks" of canvas',
+            name: 'Enable plugin',
             callback: () => {
                 this.onloadFileView();
                 this.onloadCanvasView();
