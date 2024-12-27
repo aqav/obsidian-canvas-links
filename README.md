@@ -1,9 +1,16 @@
 # Canvas Links
 
-Show the links between "Canvas" and "File". Support all filetype [accepted in Obsidian](https://help.obsidian.md/Files+and+folders/Accepted+file+formats).
-
-The plugin is available in [Obsidian Community Plugins](https://obsidian.md/plugins). After install, open command palette to enable this plugin, then the views will be default registered in the right panel. 
+The [Obsidian](https://obsidian.md/) plugin show the links between "Canvas" and "File".
 
 Wish you like it :)
 
 ![demo](./image/demo.gif)
+
+## Install
+
+Install the plugin from [Obsidian Community Plugins](https://obsidian.md/plugins).
+
+or 
+
+1. Download the `main.js`, `manifest.json`, `styles.css` from [release](https://github.com/aqav/obsidian-canvas-links/releases)
+2. Put them into `{your_vault/.obsidian/plugins/obsidian-canvas-links}`

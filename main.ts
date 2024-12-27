@@ -1,247 +1,307 @@
-import { ItemView, Plugin, TAbstractFile, TFile, WorkspaceLeaf, setIcon } from 'obsidian';
+import { ItemView, Plugin, TFile, WorkspaceLeaf, setIcon } from "obsidian";
+import { CanvasNodeData } from "obsidian/canvas";
 
-const FILE_VIEW: string = "file-view"
-const CANVAS_VIEW: string = "canvas-view"
-const ALL_VIEW: string = "all-view"
+const VIEW_TYPE: string = "canvas-links";
 
 export default class CanvasLinksPlugin extends Plugin {
+    async onload(): Promise<void> {
+        this.registerView(VIEW_TYPE, (leaf) => new CanvasLinksView(leaf));
 
-    onload(): void {
-        // console.log('load plugin') // enable plugin
-
-        this.registerView(FILE_VIEW, (leaf) => new FileView(leaf));
-        this.registerView(CANVAS_VIEW, (leaf) => new CanvasView(leaf));
-
-        this.addCommand({
-            id: ALL_VIEW,
-            name: 'Enable plugin',
-            callback: () => {
-                this.onloadFileView();
-                this.onloadCanvasView();
-            }
-        });
-    }
-
-    async onloadFileView(): Promise<void> {
-        if (this.app.workspace.getLeavesOfType(FILE_VIEW).length == 0) {
-            await this.app.workspace.getRightLeaf(false).setViewState({
-                type: FILE_VIEW,
+        const leafs: WorkspaceLeaf[] = this.app.workspace.getLeavesOfType(VIEW_TYPE);
+        if (isEmpty(leafs)) {
+            this.app.workspace.getRightLeaf(false)?.setViewState({
+                type: VIEW_TYPE,
                 active: true,
-            }); // view#onOpen()
+            });
+        } else {
+            this.app.workspace.revealLeaf(leafs[0]);
         }
-    }
-
-    async onloadCanvasView(): Promise<void> {
-        if (this.app.workspace.getLeavesOfType(CANVAS_VIEW).length == 0) {
-            await this.app.workspace.getRightLeaf(false).setViewState({
-                type: CANVAS_VIEW,
-                active: true,
-            }); // view#onOpen()
-        }
-    }
-
-    onunload(): void {
-        // console.log('unload plugin'); // disable plugin
     }
 }
 
-class FileView extends ItemView {
+class CanvasLinksView extends ItemView {
+
+    private selectedNodeId: string | null = null;
+    private canvasNode: Map<string, string[]> = new Map<string, string[]>();
 
     constructor(leaf: WorkspaceLeaf) {
         super(leaf);
     }
 
     getViewType(): string {
-        return FILE_VIEW;
+        return VIEW_TYPE;
     }
 
     getDisplayText(): string {
-        return "Files";
+        return "Canvas Links";
     }
 
     async onOpen(): Promise<void> {
-        this.icon = 'chevron-right-square'
+        this.icon = "align-center-horizontal"
 
-        this.getFiles().then((notes) => {
-            renderView(notes, 'Files', this.containerEl);
-        });
+        this.containerEl.empty();
 
-        this.registerEvent(this.app.workspace.on('file-open', () => {
-            this.getFiles().then((notes) => {
-                renderView(notes, 'Files', this.containerEl);
-            });
+        const element: HTMLDivElement = this.renderPane();
+
+        const view: any = this.app.workspace.getLeaf().view;
+        if (view.file != null) {
+            this.render(element, view);
+        }
+
+        // add/delete text/node
+        // move their position
+        // cacheRead can get newest content immidiately when modify event trigger
+        this.registerEvent(this.app.vault.on("modify", (file: TFile) => {
+            if ("canvas" != file.extension) {
+                return;
+            }
+
+            const view: any = this.app.workspace.getLeaf().view;
+
+            const filePath: string = file.path;
+
+            const previousNodeIds: string[] | undefined = this.canvasNode.get(filePath) ?? [];
+
+            const canvas = view.canvas;
+            let currentNodeIds: string[] = [];
+            for (const [key, value] of canvas.nodes) {
+                if (value.file != null) {
+                    currentNodeIds.push(key);
+                }
+            }
+            if (currentNodeIds.length != previousNodeIds.length) {
+                this.canvasNode.set(filePath, currentNodeIds);
+                this.render(element, view);
+            }
+        }));
+
+        this.registerEvent(this.app.workspace.on("active-leaf-change", (leaf: WorkspaceLeaf) => {
+            const afterChangeView: any = leaf.view;
+            if (afterChangeView.file == null) {
+                if ("empty" === afterChangeView.getViewType()) {
+                    element.empty();
+                }
+            } else {
+                if ("canvas" === afterChangeView.getViewType() && this.selectedNodeId != null) {
+                    // jump from canvas-link need focus
+                    const canvas = afterChangeView.canvas;
+                    for (const [key, value] of canvas.nodes) {
+                        if (key === this.selectedNodeId) {
+                            focus(canvas, value);
+                            this.selectedNodeId = null;
+                            break;
+                        }
+                    }
+                }
+                this.render(element, afterChangeView);
+            }
+
         }));
     }
 
-    async getFiles(): Promise<TAbstractFile[]> {
-        const activeCanvas: TFile | null = this.app.workspace.getActiveFile();
-        if (activeCanvas == null || 'canvas' != activeCanvas.extension) {
-            return [];
-        }
+    renderPane(): HTMLDivElement {
+        return this.containerEl.createDiv({
+            cls: "outgoing-link-pane node-insert-event",
+            attr: { "style": "position: relative;" },
+        });
+    }
 
-        let canvasContent = '';
-        await this.app.vault.cachedRead(activeCanvas).then((content: string) => {
-            canvasContent = content;
+    render(body: HTMLDivElement, view: any) {
+        body.empty();
+        if ("canvas" === view.getViewType()) {
+            this.renderFiles(body, view.file as TFile, view.canvas.nodes);
+            this.renderCanvases(body, view.file as TFile);
+        } else {
+            this.renderCanvases(body, view.file as TFile);
+        }
+    }
+
+    renderFiles(body: HTMLDivElement, currentFile: TFile, nodes: Map<string, CanvasNodeData>) {
+        const header: HTMLDivElement = body.createDiv({
+            cls: "tree-item-self is-clickable",
+            attr: {
+                "aria-label": "Click to collapse",
+                "aria-label-position": "right"
+            }
+        });
+        header.createSpan({ cls: "tree-item-icon collapse-icon" });
+        header.createDiv({
+            cls: "tree-item-inner",
+            text: "FILE CONTAIN"
         });
 
-        const nodes: node[] = JSON.parse(canvasContent).nodes;
-        if (nodes == null) {
-            return [];
-        }
-        const filePaths: string[] = [];
-        for (const node of nodes) {
-            if ('file' == node.type) {
-                filePaths.push(node.file);
-            }
-        }
-
-        // const files: TFile[] = [];
-        // const all: TFile[] = this.app.vault.getFiles();
-        // for (const file of all) {
-        //     if (filePaths.contains(file.path)) {
-        //         files.push(file);
-        //     }
-        // }
-        const files: TAbstractFile[] = [];
-        for (const filePath of filePaths) {
-            const file = this.app.vault.getAbstractFileByPath(filePath);
-            if (file != null) {
-                files.push(file);
-            }
-        }
-
-        return files;
-    }
-
-    async onClose(): Promise<void> {
-        // console.log('close view');
-    }
-}
-
-class CanvasView extends ItemView {
-
-    constructor(leaf: WorkspaceLeaf) {
-        super(leaf);
-    }
-
-    getViewType(): string {
-        return CANVAS_VIEW;
-    }
-
-    getDisplayText(): string {
-        return "Canvas";
-    }
-
-    async onOpen(): Promise<void> {
-        // console.log('open view');
-
-        this.icon = 'chevron-left-square'
-
-        this.getCanvas().then((canvas) => {
-            renderView(canvas, 'Canvases', this.containerEl);
+        const files: TFile[] = this.getFiles(currentFile, nodes);
+        header.createDiv({ cls: "tree-item-flair-outer" }, (el) => {
+            el.createSpan({
+                cls: "tree-item-flair",
+                text: files.length.toString()
+            })
         });
 
-        this.registerEvent(this.app.workspace.on('file-open', () => {
-            this.getCanvas().then((canvas) => {
-                renderView(canvas, 'Canvases', this.containerEl);
-            });
-        }));
+        if (isEmpty(files)) {
+            return;
+        }
+        const content: HTMLDivElement = body.createDiv({ cls: "search-result-container" });
+        content.createDiv({
+            attr: {
+                "style": "width: 1px; height: 0.1px; margin-bottom: 0px;"
+            }
+        });
+        for (const file of files) {
+            content.createDiv({
+                cls: "tree-item-self is-clickable outgoing-link-item",
+                attr: { "draggable": true }
+            }, (el) => {
+                el.createSpan({ cls: "tree-item-icon" }, (el) => {
+                    if ("md" === file.extension) {
+                        setIcon(el, "file-text");
+                    } else {
+                        setIcon(el, "file-image");
+                    }
+                });
+                el.createDiv({
+                    cls: "tree-item-inner",
+                    text: file.name.substring(0, file.name.lastIndexOf(".")) // don't show path, like link view
+                })
+            }).addEventListener("click", () => {
+                this.app.workspace.openLinkText("", file.path);
+            });;
+        }
     }
 
-    async getCanvas(): Promise<TFile[]> {
-        const activeFile: TFile | null = this.app.workspace.getActiveFile();
-        if (activeFile == null) {
-            return [];
-        }
-
-        const canvas: TFile[] = [];
-        const all: TFile[] = this.app.vault.getFiles();
-        for (const file of all) {
-            if ('canvas' == file.extension) {
-                canvas.push(file);
+    async renderCanvases(body: HTMLDivElement, currentFile: TFile) {
+        const header: HTMLDivElement = body.createDiv({
+            cls: "tree-item-self is-clickable",
+            attr: {
+                "aria-label": "Click to collapse",
+                "aria-label-position": "right"
             }
-        }
+        });
+        header.createSpan({ cls: "tree-item-icon collapse-icon" });
+        header.createDiv({
+            cls: "tree-item-inner",
+            text: "CANVAS CONTAINED"
+        });
 
-        const canvasContent: Map<TFile, string> = new Map<TFile, string>();
-        for (const file of canvas) {
-            await this.app.vault.cachedRead(file).then((content: string) => {
-                canvasContent.set(file, content);
-            });
-        }
+        const canvases: TFile[] = await this.getCanvas(currentFile);
+        header.createDiv({ cls: "tree-item-flair-outer" }, (el) => {
+            el.createSpan({
+                cls: "tree-item-flair",
+                text: canvases.length.toString()
+            })
+        });
 
-        const canvasEmebeded: TFile[] = [];
-        for (const [file, content] of canvasContent) {
-            const nodes: node[] = JSON.parse(content).nodes;
+        if (isEmpty(canvases)) {
+            return;
+        }
+        const content: HTMLDivElement = body.createDiv({ cls: "search-result-container" });
+        content.createDiv({
+            attr: {
+                "style": "width: 1px; height: 0.1px; margin-bottom: 0px;"
+            }
+        });
+        for (const canvas of canvases) {
+            content.createDiv({
+                cls: "tree-item-self is-clickable outgoing-link-item",
+                attr: { "draggable": true }
+            }, (el) => {
+                el.createSpan({ cls: "tree-item-icon" }, (el) => {
+                    setIcon(el, "layout-dashboard");
+                });
+                el.createDiv({
+                    cls: "tree-item-inner",
+                    text: canvas.name.substring(0, canvas.name.lastIndexOf(".")) // don't show path, like link view
+                })
+            }).addEventListener("click", () => {
+                this.app.workspace.openLinkText("", canvas.path);
+                this.selectedNodeId = (canvas as Canvas).selectedNodeId;
+            });;
+        }
+    }
+
+    async getCanvas(currentFile: TFile): Promise<TFile[]> {
+        const canvases: Canvas[] = [];
+
+        const files: TFile[] = this.app.vault.getFiles();
+        for (const file of files) {
+            if ("canvas" != file.extension) {
+                continue;
+            }
+
+            const content: string = await this.app.vault.cachedRead(file);
+            if (isEmpty(content)) {
+                continue;
+            }
+
+            const nodes: CanvasNodeData[] = JSON.parse(content).nodes;
             if (nodes == null) {
                 continue;
             }
+
             for (const node of nodes) {
-                if ('file' == node.type && activeFile.path == node.file) {
-                    canvasEmebeded.push(file);
+                if ("file" === node.type && currentFile.path === node.file) {
+                    const canvas = file as Canvas;
+                    canvas.selectedNodeId = node.id;
+                    canvases.push(canvas);
+                    break; // only push canvas only once
                 }
             }
         }
 
-        return canvasEmebeded;
+        canvases.sort((a, b) =>
+            asc(a.basename.toLowerCase(), b.basename.toLowerCase()));
+        return canvases;
     }
 
-    async onClose(): Promise<void> {
-        // console.log('close view');
+    getFiles(currentFile: TFile, nodes: Map<string, CanvasNodeData>): TFile[] {
+        const files: TFile[] = [];
+        let nodeIds: string[] = [];
+        for (const [key, value] of nodes) {
+            if (value.file != null) {
+                nodeIds.push(key);
+                files.push(value.file);
+            }
+        }
+        this.canvasNode.set(currentFile.path, nodeIds);
+
+        files.sort((a, b) =>
+            asc(a.basename.toLowerCase(), b.basename.toLowerCase()));
+        return files;
     }
 }
 
-function renderView(files: TAbstractFile[], text: string, container: Element): void {
-    container.empty();
-
-    const pane: HTMLDivElement = container.createDiv({
-        cls: 'outgoing-link-pane node-insert-event',
-        attr: { 'style': 'position: relative;' },
-    });
-
-    const header: HTMLDivElement = pane.createDiv({
-        cls: 'tree-item-self is-clickable',
-        attr: {
-            'aria-label': 'Click to collapse',
-            'aria-label-position': 'right'
-        }
-    });
-    header.createSpan({ cls: 'tree-item-icon collapse-icon' });
-    header.createDiv({
-        cls: 'tree-item-inner',
-        text: text
-    });
-    header.createDiv({ cls: 'tree-item-flair-outer' }, (el) => {
-        el.createSpan({
-            cls: 'tree-item-flair',
-            text: files.length.toString()
-        })
-    });
-
-    const content: HTMLDivElement = pane.createDiv({ cls: 'search-result-container' });
-    content.createDiv({
-        attr: {
-            'style': 'width: 1px; height: 0.1px; margin-bottom: 0px;'
-        }
-    });
-    for (const file of files) {
-        content.createDiv({
-            cls: 'tree-item-self is-clickable outgoing-link-item',
-            attr: { 'draggable': true }
-        }, (el) => {
-            el.createSpan({ cls: 'tree-item-icon' }, (el) => {
-                setIcon(el, 'link');
-            });
-            el.createDiv({
-                cls: 'tree-item-inner',
-                text: file.name.substring(0, file.name.lastIndexOf("."))
-            }).addEventListener('click', () => {
-                this.app.workspace.openLinkText('', file.path);
-            });
-        });
-    }
+interface Canvas extends TFile {
+    selectedNodeId: string
 }
 
-type node = {
-    type: string
-    file: string
+function focus(canvas: any, node: any) {
+    canvas.select(node);
+    canvas.zoomToSelection()
+}
+
+function isEmpty<T>(value: T): boolean {
+    if (typeof value === "string") {
+        if (value && value.length > 0) {
+            return false;
+        } else {
+            return true;
+        }
+    } else if (value instanceof Array) {
+        if (value && value.length > 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+    return true;
+}
+
+function asc<T>(a: T, b: T): number {
+    if (a < b) {
+        return -1;
+    }
+    if (a > b) {
+        return 1;
+    }
+    return 0;
 }
