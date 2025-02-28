@@ -1,9 +1,9 @@
 {
 	"id": "canvas-links",
 	"name": "Canvas Links",
-	"version": "2.0.0",
+	"version": "2.0.1",
 	"minAppVersion": "1.1.0",
-	"description": "Show the links between \"Canvas\" and \"File\".",
+	"description": "Show the \"links\" between Canvas and File.",
 	"author": "aqav",
 	"authorUrl": "https://github.com/aqav",
 	"isDesktopOnly": false
