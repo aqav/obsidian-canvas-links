@@ -1,7 +1,7 @@
 {
 	"name": "canvas-links",
 	"version": "2.0.0",
-	"description": "Show the links between \"Canvas\" and \"File\".",
+	"description": "Show the \"links\" between Canvas and File.",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",

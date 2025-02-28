@@ -7,15 +7,24 @@ export default class CanvasLinksPlugin extends Plugin {
     async onload(): Promise<void> {
         this.registerView(VIEW_TYPE, (leaf) => new CanvasLinksView(leaf));
 
-        const leafs: WorkspaceLeaf[] = this.app.workspace.getLeavesOfType(VIEW_TYPE);
-        if (isEmpty(leafs)) {
-            this.app.workspace.getRightLeaf(false)?.setViewState({
-                type: VIEW_TYPE,
-                active: true,
-            });
-        } else {
-            this.app.workspace.revealLeaf(leafs[0]);
-        }
+        this.addCommand({
+            id: 'canvas-links-open',
+            name: 'Open',
+            callback: async () => {
+                let leaf: WorkspaceLeaf | null;
+                [leaf] = this.app.workspace.getLeavesOfType(
+                    VIEW_TYPE,
+                );
+                if (!leaf) {
+                    leaf = this.app.workspace.getRightLeaf(false);
+                    await leaf?.setViewState({ type: VIEW_TYPE });
+                }
+
+                if (leaf) {
+                    this.app.workspace.revealLeaf(leaf);
+                }
+            },
+        });
     }
 }
 

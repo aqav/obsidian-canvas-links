@@ -1,6 +1,8 @@
 # Canvas Links
 
-The [Obsidian](https://obsidian.md/) plugin show the links between "Canvas" and "File".
+The [Obsidian](https://obsidian.md/) plugin Show the "links" between Canvas and File
+
+Enable the plugin, then select command "Canvas Links: Open" to use
 
 Wish you like it :)
 
